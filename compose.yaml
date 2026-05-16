@@ -1,0 +1,17 @@
+services:
+  logline:
+    build: .
+    container_name: logline
+    networks:
+      - arr
+    ports:
+      - 5959:5959
+    env_file:
+      - /home/lach/docker/.env
+    volumes:
+      - /home/lach/configs/logline:/config
+    restart: unless-stopped
+
+networks:
+  arr:
+    external: true
