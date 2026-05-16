@@ -40,9 +40,11 @@ export function processSonarr(payload: Record<string, unknown>): LogEntry | null
 
   } else if (et === 'SeriesAdd') {
     const series = payload.series as Record<string, unknown>;
+    const tags = (series.tags as string[]) ?? [];
+    const source = tags.includes('kometa') ? ' via kometa' : tags.includes('pulsarr') ? ' via pulsarr' : '';
     level = 'INFO';
     log_type = 'media_log';
-    message = `Added Series: ${series.title}`;
+    message = `Added Series: ${series.title}${source}`;
 
   } else if (et === 'SeriesDelete') {
     const series = payload.series as Record<string, unknown>;

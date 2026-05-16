@@ -30,9 +30,11 @@ export function processRadarr(payload: Record<string, unknown>): LogEntry | null
     message = `Deleted ${movie!.title} (${movie!.year}) (Reason: ${payload.deleteReason})`;
 
   } else if (et === 'MovieAdded') {
+    const tags = (movie!.tags as string[]) ?? [];
+    const source = tags.includes('kometa') ? ' via kometa' : tags.includes('pulsarr') ? ' via pulsarr' : '';
     level = 'INFO';
     log_type = 'media_log';
-    message = `Added ${movie!.title} (${movie!.year})`;
+    message = `Added ${movie!.title} (${movie!.year})${source}`;
 
   } else if (et === 'MovieDelete') {
     level = 'INFO';
