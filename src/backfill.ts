@@ -46,8 +46,9 @@ const reprocess = db.transaction(() => {
 
     const entry = processor(payload);
     if (entry) {
-      // Preserve original received_at as ts; created_at stays untouched on update, updated_at bumps
-      upsertLogEntry.run(row.received_at, entry.app, entry.level, entry.message, entry.log_type, row.id);
+      // Convert SQLite datetime('now') format to ISO8601 for HA strptime compatibility
+      const ts = new Date(row.received_at.replace(' ', 'T') + 'Z').toISOString();
+      upsertLogEntry.run(ts, entry.app, entry.level, entry.message, entry.log_type, row.id);
       reprocessed++;
     } else {
       nulled++;
