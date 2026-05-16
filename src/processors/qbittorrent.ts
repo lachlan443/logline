@@ -14,5 +14,5 @@ export function processQbittorrent(payload: Record<string, unknown>): LogEntry |
     return { ts: now, app: 'qBittorrent', level: 'INFO', message: `${eventLabel ?? 'Download Complete'} - ${name}`, log_type: 'media_downloads_log' };
   }
 
-  return { ts: now, app: 'qBittorrent', level: 'WARN', message: `Event type "${eventType}" not handled.`, log_type: 'media_other_log' };
+  return null;
 }

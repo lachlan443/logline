@@ -69,9 +69,7 @@ export function processRadarr(payload: Record<string, unknown>): LogEntry | null
     message = 'Test Payload Received';
 
   } else {
-    level = 'WARN';
-    log_type = 'media_other_log';
-    message = `Event type "${et}" not handled.`;
+    return null;
   }
 
   return { ts: now, app: 'Radarr', level, message, log_type };

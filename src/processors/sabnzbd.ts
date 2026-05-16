@@ -41,9 +41,7 @@ export function processSabnzbd(payload: Record<string, unknown>): LogEntry | nul
     message = `Disk Full - ${category}`;
 
   } else {
-    level = 'WARN';
-    log_type = 'media_other_log';
-    message = `Event "${event}" not handled.`;
+    return null;
   }
 
   return { ts: now, app: 'SABnzbd', level, message, log_type };

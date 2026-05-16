@@ -23,5 +23,5 @@ export function processProwlarr(payload: Record<string, unknown>): LogEntry | nu
     return { ts: now, app: 'Prowlarr', level: 'INFO', message: 'Test Payload Received', log_type: 'media_other_log' };
   }
 
-  return { ts: now, app: 'Prowlarr', level: 'WARN', message: `Event type "${et}" not handled.`, log_type: 'media_other_log' };
+  return null;
 }
