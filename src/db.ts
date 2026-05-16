@@ -8,6 +8,16 @@ const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// Migrations for existing databases
+const existingCols = (db.prepare("SELECT name FROM pragma_table_info('log_entries')").all() as { name: string }[]).map(r => r.name);
+for (const col of ['created_at', 'updated_at']) {
+  if (!existingCols.includes(col)) {
+    db.exec(`ALTER TABLE log_entries ADD COLUMN ${col} TEXT`);
+    db.exec(`UPDATE log_entries SET ${col} = datetime('now') WHERE ${col} IS NULL`);
+  }
+}
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_log_entries_raw_event_id ON log_entries(raw_event_id)');
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS raw_events (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +33,9 @@ db.exec(`
     level        TEXT NOT NULL,
     message      TEXT NOT NULL,
     log_type     TEXT NOT NULL,
-    raw_event_id INTEGER NOT NULL REFERENCES raw_events(id)
+    raw_event_id INTEGER NOT NULL UNIQUE REFERENCES raw_events(id),
+    created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
   CREATE INDEX IF NOT EXISTS idx_log_entries_log_type_ts
@@ -51,6 +63,18 @@ const insertRawEvent = db.prepare<[string, string]>(
 
 const insertLogEntry = db.prepare<[string, string, string, string, string, number]>(
   'INSERT INTO log_entries (ts, app, level, message, log_type, raw_event_id) VALUES (?, ?, ?, ?, ?, ?)'
+);
+
+export const upsertLogEntry = db.prepare<[string, string, string, string, string, number]>(
+  `INSERT INTO log_entries (ts, app, level, message, log_type, raw_event_id)
+   VALUES (?, ?, ?, ?, ?, ?)
+   ON CONFLICT(raw_event_id) DO UPDATE SET
+     ts         = excluded.ts,
+     app        = excluded.app,
+     level      = excluded.level,
+     message    = excluded.message,
+     log_type   = excluded.log_type,
+     updated_at = datetime('now')`
 );
 
 const selectLogs = db.prepare<[string, number], { ts: string; app: string; level: string; message: string }>(

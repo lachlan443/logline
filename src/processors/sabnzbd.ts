@@ -13,11 +13,7 @@ export function processSabnzbd(payload: Record<string, unknown>): LogEntry | nul
   if (['complete', 'pp', 'download'].includes(event)) {
     level = 'INFO';
     log_type = 'media_downloads_log';
-    message = event === 'complete'
-      ? `Job finished - ${job}`
-      : event === 'pp'
-        ? `Post-processing started - ${job}`
-        : `Added NZB - ${job}`;
+    message = `${job} - ${category}`;
 
   } else if (event === 'failed') {
     level = 'ERROR';
